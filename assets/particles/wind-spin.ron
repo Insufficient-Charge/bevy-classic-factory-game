@@ -1,0 +1,202 @@
+(
+    sprinkles_version: "0.2",
+    name: "wind-spin",
+    dimension: D3,
+    emitters: [
+        (
+            name: "Cylinder",
+            time: (
+                lifetime: 1.0,
+                one_shot: true,
+            ),
+            draw_pass: (
+                mesh: Cylinder(
+                    top_radius: 1.0,
+                    bottom_radius: 1.0,
+                    height: 0.7,
+                    radial_segments: 16,
+                    rings: 1,
+                    cap_top: false,
+                    cap_bottom: false,
+                ),
+                material: Standard((
+                    base_color: (1.0, 1.0, 1.0, 1.0),
+                    base_color_texture: Some(Preset(Circle5)),
+                    emissive: (1.0, 1.0, 1.0, 0.0),
+                    emissive_texture: Some(Preset(Circle5)),
+                    emissive_exposure_weight: 0.4,
+                    alpha_mode: Blend,
+                    perceptual_roughness: 0.5,
+                    reflectance: 0.5,
+                )),
+                shadow_caster: false,
+                transform_align: Some(YToVelocity),
+            ),
+            emission: (
+                scale: (0.0, 0.0, 0.0),
+                particles_amount: 1,
+            ),
+            scale: (
+                range: (
+                    min: 1.0,
+                    max: 1.0,
+                ),
+                scale_over_lifetime: Some((
+                    x: (
+                        points: [
+                            (
+                                position: 0.0,
+                                value: 0.0,
+                                mode: DoubleCurve,
+                                tension: 0.0,
+                                easing: Power,
+                            ),
+                            (
+                                position: 1.0,
+                                value: 1.0,
+                                mode: DoubleCurve,
+                                tension: 0.0,
+                                easing: Power,
+                            ),
+                        ],
+                        range: (
+                            min: 0.0,
+                            max: 1.0,
+                        ),
+                    ),
+                )),
+            ),
+            angle: (
+                range: (
+                    min: 30.0,
+                    max: 300.0,
+                ),
+                angle_over_lifetime: Some((
+                    x: (
+                        points: [
+                            (
+                                position: 0.06,
+                                value: 0.0,
+                                mode: DoubleCurve,
+                                tension: 0.0,
+                                easing: Power,
+                            ),
+                            (
+                                position: 1.0,
+                                value: 0.0,
+                                mode: DoubleCurve,
+                                tension: 0.0,
+                                easing: Power,
+                            ),
+                        ],
+                        range: (
+                            min: 0.0,
+                            max: 1.0,
+                        ),
+                    ),
+                    y: Some((
+                        points: [
+                            (
+                                position: 0.0,
+                                value: 0.0,
+                                mode: DoubleCurve,
+                                tension: 0.0,
+                                easing: Power,
+                            ),
+                            (
+                                position: 1.0,
+                                value: 1.0,
+                                mode: DoubleCurve,
+                                tension: 0.0,
+                                easing: Power,
+                            ),
+                        ],
+                        range: (
+                            min: 0.0,
+                            max: 1.0,
+                        ),
+                    )),
+                    z: Some((
+                        points: [
+                            (
+                                position: 0.0,
+                                value: 0.0,
+                                mode: DoubleCurve,
+                                tension: 0.0,
+                                easing: Power,
+                            ),
+                            (
+                                position: 1.0,
+                                value: 0.0,
+                                mode: SingleCurve,
+                                tension: -0.04,
+                                easing: Power,
+                            ),
+                        ],
+                        range: (
+                            min: 0.0,
+                            max: 1.0,
+                        ),
+                    )),
+                )),
+            ),
+            colors: (
+                initial_color: Solid(
+                    color: (1.0, 1.0, 1.0, 1.0),
+                ),
+                color_over_lifetime: (
+                    stops: [
+                        (
+                            color: (1.0, 1.0, 1.0, 1.0),
+                            position: 0.0,
+                        ),
+                        (
+                            color: (1.0, 1.0, 1.0, 1.0),
+                            position: 1.0,
+                        ),
+                    ],
+                ),
+                alpha_over_lifetime: Some((
+                    x: (
+                        points: [
+                            (
+                                position: 0.0,
+                                value: 1.0,
+                                mode: DoubleCurve,
+                                tension: 0.0,
+                                easing: Power,
+                            ),
+                            (
+                                position: 1.0,
+                                value: 0.0,
+                                mode: DoubleCurve,
+                                tension: -0.5700000000000001,
+                                easing: Power,
+                            ),
+                        ],
+                        range: (
+                            min: 0.0,
+                            max: 1.0,
+                        ),
+                    ),
+                )),
+            ),
+            velocities: (
+                initial_direction: (0.0, 0.0, 0.0),
+                spread: 0.0,
+                radial_velocity: (),
+                angular_velocity: (),
+                orbit_velocity: (),
+                directional_velocity: (),
+            ),
+            accelerations: (
+                gravity: (0.0, 0.0, 0.0),
+            ),
+            collision: (
+                base_size: 0.01,
+            ),
+            particle_flags: "",
+        ),
+    ],
+    colliders: [],
+)

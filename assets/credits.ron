@@ -1,0 +1,18 @@
+(
+    // the order credits listed are the order they appear in the credits
+    assets: [
+        // olekspickle
+        ("Bevy Logo", "All rights reserved by the Bevy Foundation, permission granted for splash screen use when unmodified" ),
+        ("Menu Music", "smnbl-green-emrace\nfree to bevy community, CCBY" ),
+        ("Background Music", "smnbl-rush-through-the-fields\nfree to bevy community, CCBY" ),
+        ("Button hover/press sounds, step sounds", "smnbl records\nfree to bevy community, CCBY" ),
+        ("Scene assets", "olekspickle\nfree to bevy community, CCBY" ),
+        // 3rd party
+        ("Textures", "https://www.texturecan.com/details/290, https://www.texturecan.com/details/283, CC0" ),
+        ("icons", "khusmeen, CC4" ),
+        ("font", "Not Jam, CC0" ),
+    ],
+    devs: [
+        ( "olekspickle", "architectured the structure and picked a set of bevy crates to have a template covering areas an average 3D game needs"),
+    ]
+)

@@ -1,0 +1,109 @@
+# Bevy Classic Factory Game 2
+
+This game project was generated using the [Bevy New 3D RPG](https://github.com/olekspickle/bevy_new_3d_rpg) template.
+
+## Write your game
+
+This template comes with a basic project structure that you may find useful:
+
+### Project structure
+| Path                                                  | Description                                                           |
+| ----------------------------------------------------- | --------------------------------------------------------------------- |
+| [`assets`](./assets)                                  | Asset directory                                                       |
+| [`src/main.rs`](./src/main.rs)                        | App entrypoint where system plugins and window set up                 |
+| [`src/asset_loading`](./src/asset_loading)            | Asset collections loaded via [bevy_asset_loader]                      |
+| [`src/shared`](./src/shared)                          | Shared data: config, settings, game state, inputs, markers, timers    |
+| [`src/audio`](./src/audio)                            | Marker components for sound effects and music, bus setup              |
+| [`src/camera`](./src/camera)                          | Camera setup for third person, top down and FPV modes                 |
+| [`src/scene`](./src/scene)                            | Scene setup, skybox                                                   |
+| [`src/player`](./src/player)                          | Player control & animation                                            |
+| [`src/game`](./src/game)                              | Game mechanics & content                                              |
+| [`src/ui`](./src/ui)                                  | Reusable UI widgets & game color pallet control                       |
+| [`src/screens`](./src/screens)                        | Splash/title/gameplay and other screen related systems and ui         |
+
+Feel free to move things around however you want, though
+
+## Run your game
+
+### Justfile
+There are some helpful commands in [justfile](./justfile) to simplify build options
+But generally running your game locally is very simple:
+
+<details>
+    <summary><ins>with bevy_cli</ins></summary>
+
+- Dev: `bevy run` to run a native dev build
+- Release: `bevy run --release` to run a native release build
+- Use `bevy run --release web` to run a web release build
+To run a **web** dev build to run audio in separate thread to avoid audio stuttering:
+- :`bash bevy run web --headers="Cross-Origin-Opener-Policy:same-origin" --headers="Cross-Origin-Embedder-Policy:credentialless" `
+</details>
+
+<details>
+    <summary><ins>with just</ins></summary>
+
+- Dev: `just` (runs default build) or `just build` to build
+- Lint: `just lint` to run clippy, fmt check, doc check, and web check
+- Web: `just web-dev` to run a **web** dev build to run audio in separate thread to avoid audio stuttering
+</details>
+
+<details>
+<summary><ins>Installing Linux dependencies</ins></summary>
+
+  If you're using Linux, make sure you've installed Bevy's [Linux dependencies].
+  Note that this template enables Wayland support, which requires additional dependencies as detailed in the link above.
+  Wayland is activated by using the `bevy/wayland` feature in the [`Cargo.toml`](./Cargo.toml).
+</details>
+
+<details>
+<summary><ins>(Optional) Improving compile times</ins></summary>
+
+[`.cargo/config.toml`](./.cargo/config.toml) contains documentation on how to set up your environment to improve compile times.
+</details>
+
+WARNING: if you work in a private repository, please be aware that macOS and Windows runners cost more build minutes.
+**For public repositories the workflow runners are free!**
+
+## Release your game
+
+This template uses [GitHub workflows] to run tests and build releases.
+Check the [release-flow](.github/workflows/release.yaml)
+
+## Credits
+
+The [assets](./assets) in this repository are all 3rd-party. See the see [credits](assets/credits.ron) for more information.
+
+## License
+
+The source code in this repository is licensed under any of the following at your option:
+- [CC0-1.0 License](./LICENSE-CC0)
+- [MIT License](./LICENSE-MIT)
+- [Apache License, Version 2.0](./LICENSE-APACHE)
+
+[avian3d]: https://github.com/Jondolf/avian/tree/main/crates/avian3d
+[bevy]: https://bevyengine.org/
+[bevy atmosphere example]: https://bevyengine.org/examples/3d-rendering/atmosphere/
+[bevy-discord]: https://discord.gg/bevy
+[bevy_asset_loader]: https://github.com/NiklasEi/bevy_asset_loader
+[bevy_cli]: https://github.com/TheBevyFlock/bevy_cli
+[bevy-learn]: https://bevyengine.org/learn/
+[bevy_seedling]: https://github.com/CorvusPrudens/bevy_seedling
+[bevy_third_person_camera]: https://github.com/The-DevBlog/bevy_third_person_camera
+[bevy_top_down_camera]: https://github.com/olekspickle/bevy_top_down_camera
+[bevy_ahoy]: https://github.com/janhohenheim/bevy_ahoy
+[Bevy Cheat Book]: https://bevy-cheatbook.github.io/introduction.html
+[BevyFlock]: https://github.com/TheBevyFlock/bevy_new_2d
+[bevy_enhanced_input]: https://github.com/projectharmonia/bevy_enhanced_input
+[cargo-generate]: https://github.com/cargo-generate/cargo-generate
+[just]: https://github.com/casey/just
+[GitHub workflows]: https://docs.github.com/en/actions/using-workflows
+[Linux dependencies]: https://github.com/bevyengine/bevy/blob/main/docs/linux_dependencies.md
+[skein]: https://bevyskein.dev
+[trunk]: https://trunkrs.dev/
+[Universal Animation Library]: https://quaternius.itch.io/universal-animation-library
+
+[spawn the Window hidden]: https://github.com/bevyengine/bevy/blob/release-0.14.0/examples/window/window_settings.rs#L29-L32
+[make it visible a few frames later]: https://github.com/bevyengine/bevy/blob/release-0.14.0/examples/window/window_settings.rs#L56-L64
+[`physics_in_fixed_timestep`]: https://github.com/bevyengine/bevy/blob/main/examples/movement/physics_in_fixed_timestep.rs
+[`smooth_nudge`]: https://github.com/bevyengine/bevy/blob/main/examples/movement/smooth_follow.rs#L127-L142
+[load at the start of the game]: https://github.com/rparrett/bevy_pipelines_ready/blob/main/src/lib.rs

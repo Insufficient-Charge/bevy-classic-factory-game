@@ -1,0 +1,10 @@
+target/
+.idea/
+.env
+.DS_Store
+
+# just GLTF is enough. it alread contains skein extras(will be extensions after 0.19)
+*blend*
+
+AGENTS.md
+WIP.md
