@@ -12,6 +12,9 @@ use winit::window::Icon;
 
 use std::io::Cursor;
 
+#[cfg(feature = "agent_test")]
+pub mod agent_harness;
+
 pub mod asset_loading;
 pub mod audio;
 pub mod camera;
@@ -26,6 +29,9 @@ pub mod ui;
 const NAME: &str = env!("CARGO_PKG_NAME");
 
 fn main() {
+    #[cfg(feature = "agent_test")]
+    agent_harness::init_panic_hook();
+
     let mut app = App::new();
     // Don't panic on Bevy system errors, just log them.
     app.set_error_handler(error);
@@ -37,6 +43,8 @@ fn main() {
                     title: NAME.to_string(),
                     fit_canvas_to_parent: true,
                     prevent_default_event_handling: false,
+                    #[cfg(feature = "agent_test")]
+                    visible: !agent_harness::is_headless(),
                     ..default()
                 }),
                 ..default()
@@ -53,6 +61,8 @@ fn main() {
                     NAME.replace("-", "_"),
                     bevy::log::DEFAULT_FILTER
                 ),
+                #[cfg(feature = "agent_test")]
+                custom_layer: |_| agent_harness::setup_telemetry_layer(),
                 fmt_layer: |_| {
                     Some(Box::new(
                         fmt::Layer::default()
@@ -85,6 +95,9 @@ fn main() {
     ))
     .add_plugins(SettingsPlugin::new(NAME))
     .add_systems(Startup, set_window_icon);
+
+    #[cfg(feature = "agent_test")]
+    app.add_plugins(agent_harness::AgentHarnessPlugin);
 
     // override default font
     load_internal_binary_asset!(

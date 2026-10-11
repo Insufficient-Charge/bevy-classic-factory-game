@@ -3,7 +3,7 @@ use bevy_ahoy::CharacterLook;
 
 /// Falling past this height (e.g. through a hole in the level) teleports the player back
 /// to the configured spawn point instead of leaving them to fall forever.
-const FALL_RESPAWN_Y: f32 = -100.0;
+const FALL_RESPAWN_Y: f32 = -12.0;
 
 pub fn plugin(app: &mut App) {
     app.add_systems(

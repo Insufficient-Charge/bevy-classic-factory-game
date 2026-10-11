@@ -8,32 +8,25 @@ pub fn plugin(app: &mut App) {
 
 #[allow(clippy::too_many_arguments)]
 fn movement_sound(
-    _on: On<Fire<Movement>>,
+    on: On<Fire<Movement>>,
     state: Res<GameState>,
-    // time: Res<Time>,
-    // settings: Res<Settings>,
-    // crouch: Single<&Action<Crouch>>,
-    // mut commands: Commands,
-    // mut sources: ResMut<AudioSources>,
-    // mut step_timer: Query<&mut StepTimer, With<Player>>,
+    time: Res<Time>,
+    settings: Res<Settings>,
+    mut commands: Commands,
+    mut sources: ResMut<AudioSources>,
+    mut step_timer: Query<&mut StepTimer, With<Player>>,
 ) -> Result {
     if state.muted || state.paused {
         return Ok(());
     }
 
-    // WALK SOUND
-    // let mut step_timer = step_timer.get_mut(on.context)?;
-    // if step_timer.tick(time.delta()).just_finished() && basis.standing_on_entity().is_some() {
-    //     let mut rng = rand::rng();
-    //     let crouch = ***crouch;
-    //     let handle = if crouch {
-    //         // TODO: select crouch steps
-    //         sources.steps.pick(&mut rng)
-    //     } else {
-    //         sources.steps.pick(&mut rng)
-    //     };
-    //     commands.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
-    // }
+    if let Ok(mut step_timer) = step_timer.get_mut(on.context) {
+        if step_timer.tick(time.delta()).just_finished() {
+            let mut rng = rand::rng();
+            let handle = sources.steps.pick(&mut rng);
+            commands.spawn(SamplePlayer::new(handle.clone()).with_volume(settings.sfx()));
+        }
+    }
 
     Ok(())
 }

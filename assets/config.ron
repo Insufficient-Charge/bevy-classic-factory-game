@@ -9,15 +9,15 @@
         max_height: 50.0,
     ),
     player:(
-        spawn_pos: (-0.5, 44.0, 0.5),
+        spawn_pos: (1.0, 0.5, 1.0),
         fov: 60,
         zoom: (1.5, 30),
         movement: (
-            max_speed: 100,
-            jump_height: 5.0,
-            sprint_factor: 1.5,
-            crouch_factor: 0.2,
-            dash_distance: 10,
+            max_speed: 10.0,
+            jump_height: 1.5,
+            sprint_factor: 1.7,
+            crouch_factor: 0.5,
+            dash_distance: 3.0,
             idle_to_run_threshold: 0.001,
         ),
         hitbox:(

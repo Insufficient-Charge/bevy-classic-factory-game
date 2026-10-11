@@ -4,6 +4,15 @@ clean:
 build:
     cargo build
 
+run:
+    cargo run
+
+run-release:
+    cargo run --release --no-default-features --features native,third_person
+
+build-release:
+    cargo build --release --no-default-features --features native,third_person
+
 fmt:
     cargo fmt --all -- --check
 

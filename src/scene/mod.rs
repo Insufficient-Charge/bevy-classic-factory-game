@@ -37,24 +37,8 @@ pub fn plugin(app: &mut App) {
     app.add_plugins((skybox::plugin, screen_fade::plugin, cosmic_sphere::plugin));
 }
 
-pub fn spawn_level(models: Res<Models>, gltf_assets: Res<Assets<Gltf>>, mut commands: Commands) {
-    let Some(scene) = gltf_assets.get(&models.entry_scene) else {
-        return;
-    };
-    commands
-        .spawn((
-            WorldAssetRoot(scene.scenes[0].clone()),
-            Transform::from_scale(Vec3::splat(1.0)),
-        ))
-        .observe(attach_particles)
-        .observe(setup_cosmic_sphere);
-
-    // to see something when suns go away
-    commands.insert_resource(GlobalAmbientLight {
-        color: Color::WHITE,
-        brightness: 500.0,
-        ..Default::default()
-    });
+pub fn spawn_level(_models: Res<Models>, _gltf_assets: Res<Assets<Gltf>>, _commands: Commands) {
+    // Legacy RPG template level disabled; the diorama archipelago is spawned in diorama_world::setup_cradle_meadows
 }
 
 fn attach_particles(

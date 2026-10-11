@@ -9,12 +9,13 @@ use bevy::window::{CursorGrabMode, CursorOptions, PrimaryWindow};
 #[cfg(feature = "native")]
 use bevy::{anti_alias::taa::TemporalAntiAliasing, pbr::ScreenSpaceAmbientOcclusion};
 use bevy::{
-    camera::{Exposure, Hdr},
+    camera::{Exposure, Hdr, ScalingMode},
     core_pipeline::tonemapping::Tonemapping,
     light::ShadowFilteringMethod,
     post_process::bloom::Bloom,
 };
 
+pub mod diorama;
 // mod gamepad_cursor;
 mod hdr;
 #[cfg(feature = "third_person")]
@@ -22,8 +23,10 @@ mod third_person;
 #[cfg(feature = "top_down")]
 mod top_down;
 
+pub use diorama::*;
+
 pub fn plugin(app: &mut App) {
-    app.add_plugins(hdr::plugin)
+    app.add_plugins((hdr::plugin, diorama::plugin))
         // app.add_plugins((hdr::plugin, gamepad_cursor::plugin))
         .add_systems(Startup, spawn_camera)
         .add_observer(on_toggle_cam_cursor);
@@ -40,14 +43,26 @@ markers!(SceneCamera);
 pub struct ToggleCamCursor(pub Entity);
 
 pub fn spawn_camera(mut commands: Commands) {
+    let config = DioramaCameraConfig::default();
+    let initial_yaw = config.target_yaw_radians();
+    let initial_offset = diorama::compute_camera_offset(config.pitch_radians, initial_yaw, config.distance);
+    let initial_target = Vec3::new(3.5, 0.0, 3.5); // Center of Cradle Meadows
+
     commands.spawn((
         SceneCamera,
+        DioramaCamera,
         IsDefaultUiCamera,
         Camera::default(),
         Camera3d::default(),
-        Transform::from_xyz(100., 50., 100.).looking_at(Vec3::ZERO, Vec3::Y),
+        Projection::Orthographic(OrthographicProjection {
+            scaling_mode: ScalingMode::FixedVertical {
+                viewport_height: config.vertical_size,
+            },
+            ..OrthographicProjection::default_3d()
+        }),
+        Transform::from_translation(initial_target + initial_offset).looking_at(initial_target, Vec3::Y),
         (
-            Exposure::BLENDER,
+            Exposure::SUNLIGHT,
             Tonemapping::TonyMcMapface,
             Bloom::NATURAL,
             Hdr,
