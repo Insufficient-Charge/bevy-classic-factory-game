@@ -70,7 +70,7 @@ impl HarmonicFrequency {
 }
 
 /// Attached to machines and monoliths to track their Sudoku harmonic tuning (GDD §5.4).
-#[derive(Component, Clone, Copy, Debug, PartialEq, Reflect)]
+#[derive(Component, Clone, Copy, Debug, Default, PartialEq, Reflect)]
 #[reflect(Component)]
 pub struct HarmonicTuning {
     /// Tuned frequency: 1..=9, or None for unassigned default.
@@ -81,17 +81,6 @@ pub struct HarmonicTuning {
     pub is_conflicted: bool,
     /// True if machine operates in full non-conflicting harmony within a calibrated block.
     pub in_harmony: bool,
-}
-
-impl Default for HarmonicTuning {
-    fn default() -> Self {
-        Self {
-            frequency: None,
-            is_locked: false,
-            is_conflicted: false,
-            in_harmony: false,
-        }
-    }
 }
 
 impl HarmonicTuning {
@@ -256,11 +245,11 @@ impl ResonanceGrove {
         let mut conflicts = HashSet::new();
 
         // 1. Check rows
-        for r in 0..9 {
+        for (r, row) in grid.iter().enumerate().take(9) {
             for c1 in 0..9 {
-                if let Some(f1) = grid[r][c1] {
-                    for c2 in (c1 + 1)..9 {
-                        if let Some(f2) = grid[r][c2] {
+                if let Some(f1) = row[c1] {
+                    for (c2, item) in row.iter().enumerate().skip(c1 + 1) {
+                        if let Some(f2) = *item {
                             if f1 == f2 {
                                 conflicts.insert((r, c1));
                                 conflicts.insert((r, c2));
@@ -275,8 +264,8 @@ impl ResonanceGrove {
         for c in 0..9 {
             for r1 in 0..9 {
                 if let Some(f1) = grid[r1][c] {
-                    for r2 in (r1 + 1)..9 {
-                        if let Some(f2) = grid[r2][c] {
+                    for (r2, row) in grid.iter().enumerate().skip(r1 + 1) {
+                        if let Some(f2) = row[c] {
                             if f1 == f2 {
                                 conflicts.insert((r1, c));
                                 conflicts.insert((r2, c));
@@ -289,7 +278,7 @@ impl ResonanceGrove {
 
         // 3. Check 3x3 sub-blocks
         let mut completed_blocks = [false; 9];
-        for b in 0..9 {
+        for (b, completed) in completed_blocks.iter_mut().enumerate() {
             let br = (b / 3) * 3;
             let bc = (b % 3) * 3;
             let mut seen = HashSet::new();
@@ -322,16 +311,16 @@ impl ResonanceGrove {
 
             // Block is harmonious if fully filled with all 9 digits and zero conflicts
             if filled_count == 9 && !block_has_conflict {
-                completed_blocks[b] = true;
+                *completed = true;
             }
         }
 
         let is_full_symphony = completed_blocks.iter().all(|&b| b) && conflicts.is_empty();
         let mut total_harmonic_cells = 0;
-        for r in 0..9 {
-            for c in 0..9 {
+        for (r, row) in grid.iter().enumerate().take(9) {
+            for (c, cell) in row.iter().enumerate().take(9) {
                 let b = Self::block_index(r, c);
-                if grid[r][c].is_some() && !conflicts.contains(&(r, c)) && (completed_blocks[b] || is_full_symphony) {
+                if cell.is_some() && !conflicts.contains(&(r, c)) && (completed_blocks[b] || is_full_symphony) {
                     total_harmonic_cells += 1;
                 }
             }
@@ -362,9 +351,9 @@ impl ResonanceGrove {
         let mut used = [false; 10]; // 1-indexed
 
         // Row used
-        for c in 0..9 {
+        for (c, cell) in grid[row].iter().enumerate().take(9) {
             if c != col {
-                if let Some(f) = grid[row][c] {
+                if let Some(f) = *cell {
                     if (1..=9).contains(&f) {
                         used[f as usize] = true;
                     }
@@ -373,9 +362,9 @@ impl ResonanceGrove {
         }
 
         // Col used
-        for r in 0..9 {
+        for (r, row_arr) in grid.iter().enumerate().take(9) {
             if r != row {
-                if let Some(f) = grid[r][col] {
+                if let Some(f) = row_arr[col] {
                     if (1..=9).contains(&f) {
                         used[f as usize] = true;
                     }
@@ -400,8 +389,8 @@ impl ResonanceGrove {
             }
         }
 
-        for f in 1..=9 {
-            if !used[f] {
+        for (f, &is_used) in used.iter().enumerate().take(10).skip(1) {
+            if !is_used {
                 return Some(f as u8);
             }
         }
@@ -417,8 +406,8 @@ impl ResonanceGrove {
                     for f in 1..=9 {
                         let mut can_place = true;
                         // Row check
-                        for col_idx in 0..9 {
-                            if grid[r][col_idx] == Some(f) {
+                        for cell in &grid[r] {
+                            if *cell == Some(f) {
                                 can_place = false;
                                 break;
                             }
@@ -426,8 +415,8 @@ impl ResonanceGrove {
                         if !can_place { continue; }
 
                         // Col check
-                        for row_idx in 0..9 {
-                            if grid[row_idx][c] == Some(f) {
+                        for row_arr in grid.iter().take(9) {
+                            if row_arr[c] == Some(f) {
                                 can_place = false;
                                 break;
                             }
@@ -706,9 +695,9 @@ mod tests {
         // Fill sub-block 0 (rows 0..3, cols 0..3) with all digits 1..=9
         let digits = [1, 2, 3, 4, 5, 6, 7, 8, 9];
         let mut idx = 0;
-        for dr in 0..3 {
-            for dc in 0..3 {
-                board[dr][dc] = Some(digits[idx]);
+        for row in board.iter_mut().take(3) {
+            for cell in row.iter_mut().take(3) {
+                *cell = Some(digits[idx]);
                 idx += 1;
             }
         }
@@ -767,8 +756,8 @@ mod tests {
         let mut board = [[None; 9]; 9];
 
         // Fill row 0 with 1..=8 except column 8
-        for c in 0..8 {
-            board[0][c] = Some((c + 1) as u8);
+        for (c, cell) in board[0].iter_mut().enumerate().take(8) {
+            *cell = Some((c + 1) as u8);
         }
 
         let f = grove.find_valid_frequency(&board, 0, 8);

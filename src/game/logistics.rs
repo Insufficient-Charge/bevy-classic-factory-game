@@ -461,7 +461,7 @@ pub fn update_conveyor_items(
                 }
             }
             // 6. Next tile is a Storage Chest
-            else if let Some(_) = chests_by_coord.get(&next_coord) {
+            else if chests_by_coord.contains_key(&next_coord) {
                 for (mut chest, building) in chest_query.iter_mut() {
                     if building.coord == next_coord {
                         if chest.inventory.add_item(item.item_type, 1) > 0 {
@@ -473,7 +473,7 @@ pub fn update_conveyor_items(
                 }
             }
             // 7. Next tile is a Smelting Hearth
-            else if let Some(_) = hearths_by_coord.get(&next_coord) {
+            else if hearths_by_coord.contains_key(&next_coord) {
                 for (mut hearth, building) in hearth_query.iter_mut() {
                     if building.coord == next_coord && hearth.input_ore.is_none() {
                         if matches!(item.item_type, ItemType::IronOre | ItemType::CopperOre) {

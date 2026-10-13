@@ -252,7 +252,7 @@ mod tests {
 
         // Unfold (0, 0) which has 0 adjacent hazards
         let pop = grid.unfold_tile(&GridCoord::ground(0, 0)).expect("Unfold failed");
-        assert_eq!(pop, false, "Should not hit hazard");
+        assert!(!pop, "Should not hit hazard");
 
         // (0, 0), (1, 0), (0, 1) should be revealed by cascade
         let t00 = grid.tiles.get(&GridCoord::ground(0, 0)).unwrap();
@@ -290,7 +290,7 @@ mod tests {
 
         // Now unfolding triggers the hazard!
         let pop = grid.unfold_tile(&target).unwrap();
-        assert_eq!(pop, true);
+        assert!(pop);
     }
 
     #[test]

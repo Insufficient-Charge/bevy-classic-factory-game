@@ -232,19 +232,19 @@ impl AutoclaveGrid {
             for m in &current_matches {
                 match m.match_type {
                     MatchType::Match3 => {
-                        summary.total_refined_ingots += 1 * multiplier;
+                        summary.total_refined_ingots += multiplier;
                         summary.power_generated_kw += 15.0 * multiplier as f32;
                     }
                     MatchType::Match4 => {
-                        summary.total_alloy_ingots += 1 * multiplier;
+                        summary.total_alloy_ingots += multiplier;
                         summary.power_generated_kw += 60.0 * multiplier as f32;
                     }
                     MatchType::Match5 => {
-                        summary.total_prismatic_cores += 1 * multiplier;
+                        summary.total_prismatic_cores += multiplier;
                         summary.power_generated_kw += 200.0 * multiplier as f32;
                     }
                     MatchType::TOrLShape => {
-                        summary.total_alloy_ingots += 1 * multiplier;
+                        summary.total_alloy_ingots += multiplier;
                         summary.power_generated_kw += 120.0 * multiplier as f32;
                     }
                 }
@@ -283,15 +283,15 @@ impl AutoclaveGrid {
         let mut v_lines: Vec<(GemColor, Vec<(usize, usize)>)> = Vec::new();
 
         // 1. Horizontal matches
-        for r in 0..Self::HEIGHT {
+        for (r, row) in self.cells.iter().enumerate().take(Self::HEIGHT) {
             let mut c = 0;
             while c < Self::WIDTH {
-                if let Some(color) = self.cells[r][c] {
+                if let Some(color) = row[c] {
                     let mut run = vec![(r, c)];
                     let mut resolved_color = if color == GemColor::Prismatic { None } else { Some(color) };
                     let mut next_c = c + 1;
                     while next_c < Self::WIDTH {
-                        if let Some(next_color) = self.cells[r][next_c] {
+                        if let Some(next_color) = row[next_c] {
                             if next_color == GemColor::Prismatic {
                                 run.push((r, next_c));
                                 next_c += 1;
@@ -497,7 +497,7 @@ impl AutoclaveGrid {
         }
 
         // Sort by highest match score
-        possible.sort_by(|a, b| b.2.cmp(&a.2));
+        possible.sort_by_key(|a| std::cmp::Reverse(a.2));
         let ((r1, c1), (r2, c2), _) = possible[0];
         self.swap(r1, c1, r2, c2)
     }
@@ -506,9 +506,9 @@ impl AutoclaveGrid {
     pub fn to_ascii(&self) -> String {
         let mut s = String::new();
         // Display top to bottom (row 5 down to 0)
-        for r in (0..Self::HEIGHT).rev() {
-            for c in 0..Self::WIDTH {
-                let ch = self.cells[r][c].map(|g| g.char_code()).unwrap_or('.');
+        for row in self.cells.iter().rev() {
+            for cell in row {
+                let ch = cell.map(|g| g.char_code()).unwrap_or('.');
                 s.push(ch);
                 s.push(' ');
             }
@@ -615,8 +615,8 @@ mod tests {
     #[test]
     fn test_detect_match_4_and_match_5() {
         let mut grid = AutoclaveGrid::new(102);
-        for c in 0..4 {
-            grid.cells[1][c] = Some(GemColor::Topaz);
+        for cell in grid.cells[1].iter_mut().take(4) {
+            *cell = Some(GemColor::Topaz);
         }
         grid.cells[1][4] = Some(GemColor::Ruby);
         grid.cells[1][5] = Some(GemColor::Sapphire);
@@ -625,8 +625,8 @@ mod tests {
         assert_eq!(matches.len(), 1);
         assert_eq!(matches[0].match_type, MatchType::Match4);
 
-        for c in 0..5 {
-            grid.cells[2][c] = Some(GemColor::Sapphire);
+        for cell in grid.cells[2].iter_mut().take(5) {
+            *cell = Some(GemColor::Sapphire);
         }
         grid.cells[2][5] = Some(GemColor::Ruby);
         let matches2 = grid.detect_matches();

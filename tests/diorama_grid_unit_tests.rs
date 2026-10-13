@@ -1,4 +1,4 @@
-﻿use std::collections::{HashMap, HashSet};
+use std::collections::{HashMap, HashSet};
 
 // Minimal Vec2 and Vec3 for standalone mathematical testing
 #[derive(Copy, Clone, Debug, PartialEq)]
@@ -313,6 +313,7 @@ pub struct TerrainTile {
     pub adjacent_hazards: u8,
 }
 
+#[derive(Default)]
 pub struct IslandGrid {
     pub tiles: HashMap<GridCoord, TerrainTile>,
 }
@@ -585,10 +586,12 @@ fn test_iso_input_direction_rotates_with_camera() {
 
 #[test]
 fn test_zoom_clamping() {
-    let mut config = DioramaCameraConfig::default();
-    config.min_vertical_size = 5.0;
-    config.max_vertical_size = 20.0;
-    config.vertical_size = 10.0;
+    let mut config = DioramaCameraConfig {
+        min_vertical_size: 5.0,
+        max_vertical_size: 20.0,
+        vertical_size: 10.0,
+        ..DioramaCameraConfig::default()
+    };
 
     config.adjust_zoom(-100.0);
     assert_eq!(config.vertical_size, 5.0);
@@ -627,7 +630,7 @@ fn test_unfold_cascade_on_zero() {
     grid.recompute_hazards();
 
     let pop = grid.unfold_tile(&GridCoord::ground(0, 0)).expect("Unfold failed");
-    assert_eq!(pop, false);
+    assert!(!pop);
 
     let t00 = grid.tiles.get(&GridCoord::ground(0, 0)).unwrap();
     let t10 = grid.tiles.get(&GridCoord::ground(1, 0)).unwrap();
@@ -662,5 +665,5 @@ fn test_flag_prevents_accidental_unfold() {
     assert_eq!(state2, TileProspectState::Covered);
 
     let pop = grid.unfold_tile(&target).unwrap();
-    assert_eq!(pop, true);
+    assert!(pop);
 }

@@ -63,6 +63,8 @@ fn main() {
                 ),
                 #[cfg(feature = "agent_test")]
                 custom_layer: |_| agent_harness::setup_telemetry_layer(),
+                #[cfg(not(feature = "agent_test"))]
+                custom_layer: |_| None,
                 fmt_layer: |_| {
                     Some(Box::new(
                         fmt::Layer::default()
@@ -71,7 +73,6 @@ fn main() {
                             .with_writer(std::io::stderr),
                     ))
                 },
-                ..default()
             })
             .set(ImagePlugin::default_nearest()),
     );

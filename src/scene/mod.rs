@@ -41,6 +41,7 @@ pub fn spawn_level(_models: Res<Models>, _gltf_assets: Res<Assets<Gltf>>, _comma
     // Legacy RPG template level disabled; the diorama archipelago is spawned in diorama_world::setup_cradle_meadows
 }
 
+#[allow(dead_code)]
 fn attach_particles(
     _: On<WorldInstanceReady>,
     moods: Query<(Entity, &Mood)>,

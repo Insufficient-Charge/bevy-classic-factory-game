@@ -107,8 +107,7 @@ pub fn iso_input_to_world_dir(input: Vec2, rotation_step: u8) -> Vec3 {
     let right = Vec3::new(yaw.cos(), 0.0, -yaw.sin()).normalize();
 
     // input.y is Forward/Back (W/S), input.x is Right/Left (D/A)
-    let dir = (right * input.x + forward * input.y).normalize();
-    dir
+    (right * input.x + forward * input.y).normalize()
 }
 
 /// Marker for an entity that the diorama camera should follow.
@@ -292,10 +291,12 @@ mod tests {
 
     #[test]
     fn test_zoom_clamping() {
-        let mut config = DioramaCameraConfig::default();
-        config.min_vertical_size = 5.0;
-        config.max_vertical_size = 20.0;
-        config.vertical_size = 10.0;
+        let mut config = DioramaCameraConfig {
+            min_vertical_size: 5.0,
+            max_vertical_size: 20.0,
+            vertical_size: 10.0,
+            ..DioramaCameraConfig::default()
+        };
 
         config.adjust_zoom(-100.0);
         assert_eq!(config.vertical_size, 5.0);

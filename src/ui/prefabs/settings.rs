@@ -255,7 +255,7 @@ fn debug_ui_changed(
     mut commands: Commands,
 ) {
     state.debug_ui = value_change.value;
-    commands.trigger(ToggleDebugUi);
+    commands.trigger(crate::game::ToggleDebugUi);
 }
 
 fn click_toggle_sun_cycle(

@@ -17,6 +17,10 @@ use super::terrain::{IslandGrid, TileProspectState};
 #[derive(Resource)]
 pub struct DioramaAssets {
     pub tile_mesh: Handle<Mesh>,
+    pub cliff_skirt_mesh: Handle<Mesh>,
+    pub cliff_deep_mesh: Handle<Mesh>,
+    pub cloud_sea_mesh: Handle<Mesh>,
+    pub cloud_puff_mesh: Handle<Mesh>,
     pub item_mesh: Handle<Mesh>,
     pub belt_mesh: Handle<Mesh>,
     pub viaduct_mesh: Handle<Mesh>,
@@ -32,9 +36,34 @@ pub struct DioramaAssets {
     pub monolith_mesh: Handle<Mesh>,
     pub pylon_mesh: Handle<Mesh>,
     pub conductor_mesh: Handle<Mesh>,
+    pub cog_mesh: Handle<Mesh>,
+    pub pipe_mesh: Handle<Mesh>,
+    pub chest_lid_mesh: Handle<Mesh>,
+    pub chest_latch_mesh: Handle<Mesh>,
+    pub belt_roller_mesh: Handle<Mesh>,
+    pub pedestal_mesh: Handle<Mesh>,
+    pub rune_prism_mesh: Handle<Mesh>,
+    pub autoclave_collar_mesh: Handle<Mesh>,
+    pub gemstone_core_mesh: Handle<Mesh>,
+    pub viaduct_pylon_mesh: Handle<Mesh>,
+    pub hearth_chimney_mesh: Handle<Mesh>,
+    pub hearth_ember_mesh: Handle<Mesh>,
+    pub hearth_ember_material: Handle<StandardMaterial>,
 
     pub grass_material: Handle<StandardMaterial>,
     pub revealed_material: Handle<StandardMaterial>,
+    pub cliff_material: Handle<StandardMaterial>,
+    pub deep_bedrock_material: Handle<StandardMaterial>,
+    pub chalk_cliff_material: Handle<StandardMaterial>,
+    pub grove_cliff_material: Handle<StandardMaterial>,
+    pub cloud_sea_material: Handle<StandardMaterial>,
+    pub cloud_puff_material: Handle<StandardMaterial>,
+    pub brass_metal_material: Handle<StandardMaterial>,
+    pub copper_metal_material: Handle<StandardMaterial>,
+    pub dark_timber_material: Handle<StandardMaterial>,
+    pub glass_dome_material: Handle<StandardMaterial>,
+    pub gem_glow_material: Handle<StandardMaterial>,
+    pub monolith_rune_glow: Handle<StandardMaterial>,
     pub hazard_1_material: Handle<StandardMaterial>,
     pub hazard_2_material: Handle<StandardMaterial>,
     pub hazard_3_plus_material: Handle<StandardMaterial>,
@@ -73,6 +102,10 @@ impl FromWorld for DioramaAssets {
     fn from_world(world: &mut World) -> Self {
         let mut meshes = world.resource_mut::<Assets<Mesh>>();
         let tile_mesh = meshes.add(Cuboid::new(0.96, 0.4, 0.96));
+        let cliff_skirt_mesh = meshes.add(Cuboid::new(0.96, 0.8, 0.96));
+        let cliff_deep_mesh = meshes.add(Cuboid::new(0.88, 1.2, 0.88));
+        let cloud_sea_mesh = meshes.add(Cuboid::new(800.0, 0.4, 800.0));
+        let cloud_puff_mesh = meshes.add(Sphere::new(2.8));
         let item_mesh = meshes.add(Sphere::new(0.18));
         let belt_mesh = meshes.add(Cuboid::new(0.90, 0.15, 0.90));
         let viaduct_mesh = meshes.add(Cuboid::new(0.90, 0.20, 0.90));
@@ -88,17 +121,95 @@ impl FromWorld for DioramaAssets {
         let monolith_mesh = meshes.add(Cuboid::new(0.7, 1.5, 0.7));
         let pylon_mesh = meshes.add(Cylinder::new(0.25, 1.4));
         let conductor_mesh = meshes.add(Sphere::new(0.4));
+        let cog_mesh = meshes.add(Cylinder::new(0.28, 0.08));
+        let pipe_mesh = meshes.add(Cylinder::new(0.08, 0.35));
+        let chest_lid_mesh = meshes.add(Cuboid::new(0.64, 0.12, 0.64));
+        let chest_latch_mesh = meshes.add(Cuboid::new(0.12, 0.12, 0.06));
+        let belt_roller_mesh = meshes.add(Cylinder::new(0.06, 0.82));
+        let pedestal_mesh = meshes.add(Cuboid::new(0.82, 0.28, 0.82));
+        let rune_prism_mesh = meshes.add(Cuboid::new(0.32, 0.32, 0.32));
+        let autoclave_collar_mesh = meshes.add(Cylinder::new(0.42, 0.16));
+        let gemstone_core_mesh = meshes.add(Sphere::new(0.18));
+        let viaduct_pylon_mesh = meshes.add(Cuboid::new(0.18, 1.05, 0.18));
+        let hearth_chimney_mesh = meshes.add(Cylinder::new(0.15, 0.40));
+        let hearth_ember_mesh = meshes.add(Cuboid::new(0.38, 0.16, 0.38));
         let sky_backdrop_mesh = meshes.add(Cuboid::new(500.0, 0.1, 500.0));
 
         let mut materials = world.resource_mut::<Assets<StandardMaterial>>();
         let grass_material = materials.add(StandardMaterial {
-            base_color: Color::srgb(0.32, 0.68, 0.28),
-            perceptual_roughness: 0.8,
+            base_color: Color::srgb(0.26, 0.65, 0.30),
+            perceptual_roughness: 0.82,
             ..default()
         });
         let revealed_material = materials.add(StandardMaterial {
-            base_color: Color::srgb(0.45, 0.50, 0.55),
-            perceptual_roughness: 0.6,
+            base_color: Color::srgb(0.50, 0.42, 0.32),
+            perceptual_roughness: 0.75,
+            ..default()
+        });
+        let cliff_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.44, 0.34, 0.26),
+            perceptual_roughness: 0.88,
+            ..default()
+        });
+        let deep_bedrock_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.28, 0.24, 0.22),
+            perceptual_roughness: 0.95,
+            ..default()
+        });
+        let chalk_cliff_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.78, 0.76, 0.72),
+            perceptual_roughness: 0.70,
+            ..default()
+        });
+        let grove_cliff_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.35, 0.38, 0.36),
+            perceptual_roughness: 0.82,
+            ..default()
+        });
+        let cloud_sea_material = materials.add(StandardMaterial {
+            base_color: Color::srgba(0.92, 0.94, 0.98, 0.88),
+            unlit: true,
+            cull_mode: None,
+            ..default()
+        });
+        let cloud_puff_material = materials.add(StandardMaterial {
+            base_color: Color::srgba(0.98, 0.96, 0.94, 0.90),
+            unlit: true,
+            ..default()
+        });
+        let brass_metal_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.88, 0.72, 0.28),
+            metallic: 0.85,
+            perceptual_roughness: 0.25,
+            ..default()
+        });
+        let copper_metal_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.82, 0.48, 0.30),
+            metallic: 0.80,
+            perceptual_roughness: 0.30,
+            ..default()
+        });
+        let dark_timber_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.36, 0.24, 0.15),
+            perceptual_roughness: 0.85,
+            ..default()
+        });
+        let glass_dome_material = materials.add(StandardMaterial {
+            base_color: Color::srgba(0.86, 0.92, 0.98, 0.45),
+            metallic: 0.15,
+            perceptual_roughness: 0.10,
+            ..default()
+        });
+        let gem_glow_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.98, 0.25, 0.60),
+            emissive: LinearRgba::new(0.8, 0.1, 0.5, 1.0),
+            perceptual_roughness: 0.20,
+            ..default()
+        });
+        let monolith_rune_glow = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.72, 0.52, 0.98),
+            emissive: LinearRgba::new(0.5, 0.3, 0.9, 1.0),
+            perceptual_roughness: 0.25,
             ..default()
         });
         let hazard_1_material = materials.add(StandardMaterial {
@@ -175,6 +286,12 @@ impl FromWorld for DioramaAssets {
         let hearth_material = materials.add(StandardMaterial {
             base_color: Color::srgb(0.35, 0.32, 0.30),
             emissive: LinearRgba::new(0.6, 0.2, 0.05, 1.0),
+            ..default()
+        });
+        let hearth_ember_material = materials.add(StandardMaterial {
+            base_color: Color::srgb(0.95, 0.35, 0.08),
+            emissive: LinearRgba::new(1.4, 0.45, 0.08, 1.0),
+            perceptual_roughness: 0.3,
             ..default()
         });
         let compressor_material = materials.add(StandardMaterial {
@@ -268,6 +385,10 @@ impl FromWorld for DioramaAssets {
 
         Self {
             tile_mesh,
+            cliff_skirt_mesh,
+            cliff_deep_mesh,
+            cloud_sea_mesh,
+            cloud_puff_mesh,
             item_mesh,
             belt_mesh,
             viaduct_mesh,
@@ -283,8 +404,33 @@ impl FromWorld for DioramaAssets {
             monolith_mesh,
             pylon_mesh,
             conductor_mesh,
+            cog_mesh,
+            pipe_mesh,
+            chest_lid_mesh,
+            chest_latch_mesh,
+            belt_roller_mesh,
+            pedestal_mesh,
+            rune_prism_mesh,
+            autoclave_collar_mesh,
+            gemstone_core_mesh,
+            viaduct_pylon_mesh,
+            hearth_chimney_mesh,
+            hearth_ember_mesh,
+            hearth_ember_material,
             grass_material,
             revealed_material,
+            cliff_material,
+            deep_bedrock_material,
+            chalk_cliff_material,
+            grove_cliff_material,
+            cloud_sea_material,
+            cloud_puff_material,
+            brass_metal_material,
+            copper_metal_material,
+            dark_timber_material,
+            glass_dome_material,
+            gem_glow_material,
+            monolith_rune_glow,
             hazard_1_material,
             hazard_2_material,
             hazard_3_plus_material,
@@ -316,7 +462,7 @@ impl FromWorld for DioramaAssets {
             ingot_cube_material,
             sky_backdrop_mesh,
             sky_backdrop_material: materials.add(StandardMaterial {
-                base_color: Color::srgb(0.48, 0.65, 0.82),
+                base_color: Color::srgb(0.54, 0.72, 0.88),
                 unlit: true,
                 cull_mode: None,
                 ..default()
@@ -356,37 +502,65 @@ pub fn setup_cradle_meadows(
         DespawnOnExit(Screen::Gameplay),
         Mesh3d(assets.sky_backdrop_mesh.clone()),
         MeshMaterial3d(assets.sky_backdrop_material.clone()),
-        Transform::from_xyz(4.0, -15.0, 4.0),
+        Transform::from_xyz(4.0, -18.0, 4.0),
     ));
 
-    // Spawn warm golden diorama sunlight with soft shadows
+    // Spawn soft cloud-sea plane directly beneath archipelago
+    commands.spawn((
+        DespawnOnExit(Screen::Gameplay),
+        Mesh3d(assets.cloud_sea_mesh.clone()),
+        MeshMaterial3d(assets.cloud_sea_material.clone()),
+        Transform::from_xyz(4.0, -5.2, 4.0),
+    ));
+
+    // Spawn scenic drifting low-poly cloud puffs around the diorama horizon
+    let cloud_positions = [
+        (Vec3::new(-16.0, -4.0, -12.0), Vec3::new(4.2, 1.0, 3.4)),
+        (Vec3::new(-8.0, -4.5, 26.0), Vec3::new(3.8, 1.2, 3.2)),
+        (Vec3::new(26.0, -4.2, -8.0), Vec3::new(4.5, 1.1, 3.6)),
+        (Vec3::new(36.0, -4.4, 18.0), Vec3::new(5.0, 1.3, 4.0)),
+        (Vec3::new(16.0, -4.6, 40.0), Vec3::new(4.0, 1.0, 3.5)),
+        (Vec3::new(-20.0, -4.2, 14.0), Vec3::new(4.6, 1.2, 3.8)),
+        (Vec3::new(6.0, -4.8, -18.0), Vec3::new(3.5, 0.9, 3.0)),
+        (Vec3::new(-12.0, -4.4, 34.0), Vec3::new(4.0, 1.1, 3.2)),
+    ];
+    for (pos, scale) in cloud_positions {
+        commands.spawn((
+            DespawnOnExit(Screen::Gameplay),
+            Mesh3d(assets.cloud_puff_mesh.clone()),
+            MeshMaterial3d(assets.cloud_puff_material.clone()),
+            Transform::from_translation(pos).with_scale(scale),
+        ));
+    }
+
+    // Spawn warm golden diorama sunlight with soft shadows (GDD §10.1 & §15.3)
     commands.spawn((
         DirectionalLight {
-            color: Color::srgb(1.0, 0.96, 0.88),
-            illuminance: 80_000.0,
+            color: Color::srgb(1.0, 0.93, 0.80),
+            illuminance: 75_000.0,
             shadow_maps_enabled: true,
             ..default()
         },
-        Transform::from_xyz(16.0, 24.0, 16.0).looking_at(Vec3::new(4.0, 0.0, 6.0), Vec3::Y),
+        Transform::from_xyz(18.0, 26.0, 18.0).looking_at(Vec3::new(4.0, 0.0, 6.0), Vec3::Y),
         DespawnOnExit(Screen::Gameplay),
     ));
 
     // Spawn cool sky fill light from opposite angle
     commands.spawn((
         DirectionalLight {
-            color: Color::srgb(0.75, 0.85, 1.0),
-            illuminance: 25_000.0,
+            color: Color::srgb(0.70, 0.82, 0.98),
+            illuminance: 22_000.0,
             shadow_maps_enabled: false,
             ..default()
         },
-        Transform::from_xyz(-12.0, 18.0, -8.0).looking_at(Vec3::new(4.0, 0.0, 6.0), Vec3::Y),
+        Transform::from_xyz(-14.0, 20.0, -10.0).looking_at(Vec3::new(4.0, 0.0, 6.0), Vec3::Y),
         DespawnOnExit(Screen::Gameplay),
     ));
 
     // Set pastoral sky clear color and ambient skylight bounce
-    commands.insert_resource(ClearColor(Color::srgb(0.48, 0.65, 0.82)));
+    commands.insert_resource(ClearColor(Color::srgb(0.54, 0.72, 0.88)));
     commands.insert_resource(GlobalAmbientLight {
-        color: Color::srgb(0.82, 0.88, 0.98),
+        color: Color::srgb(0.88, 0.92, 0.98),
         brightness: 8000.0,
         ..default()
     });
@@ -484,7 +658,18 @@ pub fn setup_cradle_meadows(
             Transform::from_translation(world_pos + Vec3::new(0.0, 0.75, 0.0)),
             RigidBody::Static,
             Collider::cuboid(0.7, 1.5, 0.7),
-        ));
+        )).with_children(|b| {
+            b.spawn((
+                Mesh3d(assets.pedestal_mesh.clone()),
+                MeshMaterial3d(assets.cliff_material.clone()),
+                Transform::from_xyz(0.0, -0.62, 0.0),
+            ));
+            b.spawn((
+                Mesh3d(assets.rune_prism_mesh.clone()),
+                MeshMaterial3d(assets.monolith_rune_glow.clone()),
+                Transform::from_xyz(0.0, 0.90, 0.0),
+            ));
+        });
     }
 
     // Add resource deposits
@@ -535,9 +720,13 @@ pub fn setup_cradle_meadows(
         }
     }
 
-    // Spawn 3D visual tile entities
+    // Spawn 3D visual tile entities and multi-layered diorama cliff foundations (GDD §10.1)
     for (&coord, tile) in island_grid.tiles.iter() {
         let world_pos = coord.to_world_pos();
+
+        let is_bridge = (coord.y >= 13 && coord.y < 16)
+            || (coord.y >= 23 && coord.y < 26)
+            || (coord.x >= 13 && coord.x < 16 && coord.y >= 3 && coord.y < 5);
 
         let material = if (coord.y >= 13 && coord.y < 16) || (coord.y >= 23 && coord.y < 26) {
             assets.bridge_material.clone()
@@ -571,6 +760,7 @@ pub fn setup_cradle_meadows(
             }
         };
 
+        // Surface turf / walkway tile with avian3d collider
         commands.spawn((
             DespawnOnExit(Screen::Gameplay),
             VisualTileMarker { coord },
@@ -580,6 +770,46 @@ pub fn setup_cradle_meadows(
             RigidBody::Static,
             Collider::cuboid(1.0, 0.4, 1.0),
         ));
+
+        // Subterranean cliff foundations for floating archipelago islands
+        if !is_bridge {
+            let is_edge = [
+                (coord.x + 1, coord.y),
+                (coord.x - 1, coord.y),
+                (coord.x, coord.y + 1),
+                (coord.x, coord.y - 1),
+            ]
+            .iter()
+            .any(|&(nx, ny)| !island_grid.tiles.contains_key(&GridCoord::ground(nx, ny)));
+
+            let cliff_mat = if coord.y >= 16 && coord.y < 23 {
+                assets.chalk_cliff_material.clone()
+            } else if coord.x >= 16 && coord.x < 25 && coord.y >= 0 && coord.y < 9 {
+                assets.grove_cliff_material.clone()
+            } else if coord.y >= 26 {
+                assets.deep_bedrock_material.clone()
+            } else {
+                assets.cliff_material.clone()
+            };
+
+            // Intermediate cliff foundation skirt under every island tile
+            commands.spawn((
+                DespawnOnExit(Screen::Gameplay),
+                Mesh3d(assets.cliff_skirt_mesh.clone()),
+                MeshMaterial3d(cliff_mat),
+                Transform::from_translation(world_pos - Vec3::new(0.0, 0.8, 0.0)),
+            ));
+
+            // Deep bedrock roots for perimeter cliff edges
+            if is_edge {
+                commands.spawn((
+                    DespawnOnExit(Screen::Gameplay),
+                    Mesh3d(assets.cliff_deep_mesh.clone()),
+                    MeshMaterial3d(assets.deep_bedrock_material.clone()),
+                    Transform::from_translation(world_pos - Vec3::new(0.0, 1.8, 0.0)),
+                ));
+            }
+        }
     }
     info!("Spawned {} visual tiles for diorama archipelago", island_grid.tiles.len());
 }
@@ -607,6 +837,7 @@ pub fn setup_player_inventory(
         inventory.add_item(ItemType::WoodenRollerBelt, 12);
         inventory.add_item(ItemType::ClockworkWellhead, 1);
         inventory.add_item(ItemType::StorageChest, 2);
+        inventory.add_item(ItemType::SmeltingHearth, 2);
 
         // Phase 2 multi-layer and polyomino items (GDD §5.2 & §8.2)
         inventory.add_item(ItemType::ViaductBelt, 8);
@@ -785,6 +1016,133 @@ pub fn on_building_placed(
 
     if let Some(col) = collider {
         entity_cmds.insert((RigidBody::Static, col));
+    }
+
+    // Spawn rich multi-part toybox details (GDD §10.1 & §8)
+    match ev.building_type {
+        BuildingType::Wellhead => {
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.cog_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(0.0, 0.42, 0.0),
+                ));
+                b.spawn((
+                    Mesh3d(assets.pipe_mesh.clone()),
+                    MeshMaterial3d(assets.copper_metal_material.clone()),
+                    Transform::from_xyz(0.22, 0.15, 0.0),
+                ));
+            });
+        }
+        BuildingType::StorageChest => {
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.chest_lid_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(0.0, 0.26, 0.0),
+                ));
+                b.spawn((
+                    Mesh3d(assets.chest_latch_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(0.0, 0.12, 0.31),
+                ));
+            });
+        }
+        BuildingType::Belt(_) => {
+            let roller_rot = Quat::from_rotation_z(std::f32::consts::FRAC_PI_2);
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.belt_roller_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(0.0, 0.08, 0.22).with_rotation(roller_rot),
+                ));
+                b.spawn((
+                    Mesh3d(assets.belt_roller_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(0.0, 0.08, -0.22).with_rotation(roller_rot),
+                ));
+            });
+        }
+        BuildingType::ChromaticAutoclave(_) => {
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.autoclave_collar_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(0.0, -0.28, 0.0),
+                ));
+                b.spawn((
+                    Mesh3d(assets.gemstone_core_mesh.clone()),
+                    MeshMaterial3d(assets.gem_glow_material.clone()),
+                    Transform::IDENTITY,
+                ));
+            });
+        }
+        BuildingType::AcousticMonolith => {
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.pedestal_mesh.clone()),
+                    MeshMaterial3d(assets.cliff_material.clone()),
+                    Transform::from_xyz(0.0, -0.65, 0.0),
+                ));
+                b.spawn((
+                    Mesh3d(assets.rune_prism_mesh.clone()),
+                    MeshMaterial3d(assets.monolith_rune_glow.clone()),
+                    Transform::from_xyz(0.0, 0.90, 0.0),
+                ));
+            });
+        }
+        BuildingType::ViaductBelt(_) | BuildingType::HarmonicBridge(_) => {
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.viaduct_pylon_mesh.clone()),
+                    MeshMaterial3d(assets.dark_timber_material.clone()),
+                    Transform::from_xyz(-0.32, -0.525, 0.0),
+                ));
+                b.spawn((
+                    Mesh3d(assets.viaduct_pylon_mesh.clone()),
+                    MeshMaterial3d(assets.dark_timber_material.clone()),
+                    Transform::from_xyz(0.32, -0.525, 0.0),
+                ));
+            });
+        }
+        BuildingType::SmeltingHearth => {
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.hearth_ember_mesh.clone()),
+                    MeshMaterial3d(assets.hearth_ember_material.clone()),
+                    Transform::from_xyz(0.0, 0.20, 0.0),
+                ));
+                b.spawn((
+                    Mesh3d(assets.hearth_chimney_mesh.clone()),
+                    MeshMaterial3d(assets.copper_metal_material.clone()),
+                    Transform::from_xyz(0.18, 0.38, -0.18),
+                ));
+            });
+        }
+        BuildingType::TuningForkPylon => {
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.pipe_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(-0.16, 0.65, 0.0),
+                ));
+                b.spawn((
+                    Mesh3d(assets.pipe_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(0.16, 0.65, 0.0),
+                ));
+            });
+        }
+        BuildingType::ResonanceConductor => {
+            entity_cmds.with_children(|b| {
+                b.spawn((
+                    Mesh3d(assets.autoclave_collar_mesh.clone()),
+                    MeshMaterial3d(assets.brass_metal_material.clone()),
+                    Transform::from_xyz(0.0, -0.22, 0.0),
+                ));
+            });
+        }
+        _ => {}
     }
 }
 

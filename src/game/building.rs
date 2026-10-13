@@ -209,7 +209,7 @@ pub fn on_place_building(
             entity_cmds.insert(TuningForkPylon::default());
         }
         BuildingType::HarmonicBridge(_) => {
-            entity_cmds.insert(HarmonicBridge::default());
+            entity_cmds.insert(HarmonicBridge);
         }
         BuildingType::ResonanceConductor => {
             entity_cmds.insert(ResonanceConductor::default());

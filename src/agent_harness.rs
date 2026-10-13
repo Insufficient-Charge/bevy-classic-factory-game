@@ -3,6 +3,7 @@
 
 use bevy::input::keyboard::KeyCode;
 use bevy::prelude::*;
+use avian3d::prelude::{Collider, LinearVelocity, Position};
 use std::io::{BufRead, BufReader, Write};
 use std::net::{TcpListener, TcpStream};
 use std::sync::Mutex;
@@ -222,14 +223,15 @@ struct HarnessQueries<'w, 's> {
     player: Query<'w, 's, (Entity, &'static Transform, Option<&'static crate::game::Inventory>, Option<&'static mut crate::game::Hotbar>), With<crate::player::Player>>,
     camera: Query<'w, 's, (Entity, &'static Transform), With<crate::camera::SceneCamera>>,
     all_camera: Query<'w, 's, (Entity, &'static Transform), With<Camera3d>>,
-    buildings: Query<'w, 's, &'static crate::game::Building>,
+    buildings: Query<'w, 's, (Entity, &'static crate::game::Building, Option<&'static Mesh3d>, Option<&'static Transform>, Option<&'static Children>, Option<&'static Collider>)>,
     compressors: Query<'w, 's, (Entity, &'static crate::game::CargoCompressor, &'static crate::game::Building)>,
     autoclaves: Query<'w, 's, (Entity, &'static mut crate::game::ChromaticAutoclave, &'static crate::game::Building)>,
     bell_jars: Query<'w, 's, (Entity, &'static crate::game::ResonanceBellJar, &'static crate::game::Building)>,
     monoliths: Query<'w, 's, (Entity, &'static crate::game::AcousticMonolith, &'static crate::game::Building)>,
     tunings: Query<'w, 's, (Entity, &'static mut crate::game::HarmonicTuning, &'static crate::game::Building)>,
-    transported_items: Query<'w, 's, &'static crate::game::TransportedItem>,
-    visual_tiles: Query<'w, 's, Entity, With<crate::game::VisualTileMarker>>,
+    transported_items: Query<'w, 's, (Entity, &'static crate::game::TransportedItem, Option<&'static Mesh3d>, Option<&'static Transform>)>,
+    visual_tiles: Query<'w, 's, (Entity, &'static crate::game::VisualTileMarker, Option<&'static Mesh3d>, Option<&'static Transform>)>,
+    all_meshes: Query<'w, 's, &'static Mesh3d>,
 }
 
 /// Drains incoming socket commands each frame and applies them to Bevy ECS state.
@@ -305,7 +307,7 @@ fn handle_agent_commands(
                 }
             }
             "query" => {
-                if parts.len() >= 2 && parts[1].to_ascii_lowercase() == "state" {
+                if parts.len() >= 2 && parts[1].eq_ignore_ascii_case("state") {
                     let player_entry = q.player.iter().next();
                     let player_data = player_entry.as_ref().map(|(entity, t, _, _)| {
                         let (yaw, pitch, roll) = t.rotation.to_euler(EulerRot::YXZ);
@@ -392,11 +394,21 @@ fn handle_agent_commands(
 
                     let placed_buildings: Vec<_> = q.buildings
                         .iter()
-                        .map(|b| {
+                        .map(|(ent, b, mesh_opt, tr_opt, children_opt, col_opt)| {
+                            let child_count = children_opt.map(|c| c.len()).unwrap_or(0);
+                            let child_mesh_count = children_opt.map(|c| {
+                                c.iter().filter(|child| q.all_meshes.get(*child).is_ok()).count()
+                            }).unwrap_or(0);
                             serde_json::json!({
+                                "entity": ent.to_bits(),
                                 "coord": [b.coord.x, b.coord.y],
                                 "layer": format!("{:?}", b.coord.layer),
                                 "type": format!("{:?}", b.building_type),
+                                "has_mesh": mesh_opt.is_some(),
+                                "has_collider": col_opt.is_some(),
+                                "translation": tr_opt.map(|tr| [tr.translation.x, tr.translation.y, tr.translation.z]),
+                                "children_count": child_count,
+                                "children_meshes_count": child_mesh_count,
                             })
                         })
                         .collect();
@@ -526,6 +538,79 @@ fn handle_agent_commands(
                     });
 
                     serde_json::to_string(&state_json).unwrap_or_else(|_| "{}".to_string())
+                } else if parts.len() >= 4 && parts[1].eq_ignore_ascii_case("visual") {
+                    if let (Ok(x), Ok(y)) = (parts[2].parse::<i32>(), parts[3].parse::<i32>()) {
+                        let layer = if parts.len() >= 5 {
+                            match parts[4].to_ascii_lowercase().as_str() {
+                                "viaduct" | "z1" | "1" => crate::game::Layer::Viaduct,
+                                "skyway" | "z2" | "2" => crate::game::Layer::Skyway,
+                                "subterranean" | "-1" => crate::game::Layer::Subterranean,
+                                _ => crate::game::Layer::Ground,
+                            }
+                        } else {
+                            crate::game::Layer::Ground
+                        };
+
+                        let target_coord = crate::game::GridCoord::new(x, y, layer);
+                        let ground_coord = crate::game::GridCoord::ground(x, y);
+
+                        // Tile visual data
+                        let tile_info = island_grid.as_ref().and_then(|g| g.tiles.get(&ground_coord)).map(|t| {
+                            let visual_tile = q.visual_tiles.iter().find(|(_, marker, _, _)| marker.coord == ground_coord);
+                            serde_json::json!({
+                                "coord": [x, y],
+                                "prospect_state": format!("{:?}", t.prospect_state),
+                                "has_hazard": t.has_overcharge_hazard,
+                                "adjacent_hazards": t.adjacent_hazards,
+                                "has_mesh": visual_tile.as_ref().map(|(_, _, m, _)| m.is_some()).unwrap_or(false),
+                                "translation": visual_tile.as_ref().and_then(|(_, _, _, tr)| tr.map(|tr| [tr.translation.x, tr.translation.y, tr.translation.z])),
+                            })
+                        });
+
+                        // Building visual data
+                        let building_info = q.buildings.iter().find(|(_, b, _, _, _, _)| b.coord == target_coord).map(|(ent, b, mesh_opt, tr_opt, children_opt, col_opt)| {
+                            let child_count = children_opt.map(|c| c.len()).unwrap_or(0);
+                            let child_mesh_count = children_opt.map(|c| {
+                                c.iter().filter(|child| q.all_meshes.get(*child).is_ok()).count()
+                            }).unwrap_or(0);
+
+                            serde_json::json!({
+                                "entity": ent.to_bits(),
+                                "coord": [x, y],
+                                "layer": format!("{:?}", layer),
+                                "building_type": format!("{:?}", b.building_type),
+                                "has_mesh": mesh_opt.is_some(),
+                                "has_collider": col_opt.is_some(),
+                                "translation": tr_opt.map(|tr| [tr.translation.x, tr.translation.y, tr.translation.z]),
+                                "rotation": tr_opt.map(|tr| [tr.rotation.x, tr.rotation.y, tr.rotation.z, tr.rotation.w]),
+                                "children_count": child_count,
+                                "children_meshes_count": child_mesh_count,
+                            })
+                        });
+
+                        // Transported items at this coordinate
+                        let items_info: Vec<_> = q.transported_items.iter().filter(|(_, item, _, _)| item.current_coord == target_coord).map(|(ent, item, mesh_opt, tr_opt)| {
+                            serde_json::json!({
+                                "entity": ent.to_bits(),
+                                "item_type": format!("{:?}", item.item_type),
+                                "progress": item.progress,
+                                "has_mesh": mesh_opt.is_some(),
+                                "translation": tr_opt.map(|tr| [tr.translation.x, tr.translation.y, tr.translation.z]),
+                            })
+                        }).collect();
+
+                        let visual_json = serde_json::json!({
+                            "coord": [x, y],
+                            "layer": format!("{:?}", layer),
+                            "tile": tile_info,
+                            "building": building_info,
+                            "items": items_info,
+                        });
+
+                        serde_json::to_string(&visual_json).unwrap_or_else(|_| "{}".to_string())
+                    } else {
+                        "ERR_INVALID_COORDS".to_string()
+                    }
                 } else {
                     format!("ERR_UNKNOWN_QUERY {}", raw)
                 }
@@ -534,7 +619,7 @@ fn handle_agent_commands(
                 if parts.len() < 3 {
                     "ERR_USAGE prospect <x> <y> [unfold|flag]".to_string()
                 } else if let (Ok(x), Ok(y)) = (parts[1].parse::<i32>(), parts[2].parse::<i32>()) {
-                    let mode = if parts.len() >= 4 && parts[3].to_ascii_lowercase() == "flag" {
+                    let mode = if parts.len() >= 4 && parts[3].eq_ignore_ascii_case("flag") {
                         crate::game::ProspectMode::Flag
                     } else {
                         crate::game::ProspectMode::Unfold
@@ -971,6 +1056,67 @@ fn handle_agent_commands(
                         }
                         _ => format!("ERR_UNKNOWN_GROVE_SUBCMD {}", parts[1]),
                     }
+                }
+            }
+            "teleport" => {
+                if parts.len() < 3 {
+                    "ERR_USAGE teleport <x> <y>".to_string()
+                } else if let (Ok(x), Ok(y)) = (parts[1].parse::<f32>(), parts[2].parse::<f32>()) {
+                    if let Some((player_entity, _, _, _)) = q.player.iter().next() {
+                        let target_pos = Vec3::new(x * crate::game::GridCoord::TILE_SIZE, 0.5, y * crate::game::GridCoord::TILE_SIZE);
+                        commands.entity(player_entity).insert((
+                            Transform::from_translation(target_pos),
+                            Position(target_pos),
+                            LinearVelocity(Vec3::ZERO),
+                        ));
+                        format!("ACK_TELEPORT {:.1} {:.1}", x, y)
+                    } else {
+                        "ERR_NO_PLAYER".to_string()
+                    }
+                } else {
+                    "ERR_INVALID_COORDS".to_string()
+                }
+            }
+            "spawn_item" => {
+                if parts.len() < 3 {
+                    "ERR_USAGE spawn_item <x> <y> [item_type] [layer]".to_string()
+                } else if let (Ok(x), Ok(y)) = (parts[1].parse::<i32>(), parts[2].parse::<i32>()) {
+                    let itype = if parts.len() >= 4 {
+                        match parts[3].to_ascii_lowercase().as_str() {
+                            "iron_ore" => crate::game::ItemType::IronOre,
+                            "copper_ore" => crate::game::ItemType::CopperOre,
+                            "iron_plate" => crate::game::ItemType::IronPlate,
+                            "copper_plate" => crate::game::ItemType::CopperPlate,
+                            "ingot_cube" | "ingot" => crate::game::ItemType::IngotCube,
+                            "domino" | "polyomino_domino" => crate::game::ItemType::PolyominoDomino,
+                            "square" | "polyomino_square" => crate::game::ItemType::PolyominoSquare,
+                            "ibar" | "polyomino_ibar" => crate::game::ItemType::PolyominoIBar,
+                            "ruby" => crate::game::ItemType::Ruby,
+                            "sapphire" => crate::game::ItemType::Sapphire,
+                            "stone" => crate::game::ItemType::Stone,
+                            "clay" => crate::game::ItemType::Clay,
+                            _ => crate::game::ItemType::IronPlate,
+                        }
+                    } else {
+                        crate::game::ItemType::IronPlate
+                    };
+
+                    let layer = if parts.len() >= 5 {
+                        match parts[4].to_ascii_lowercase().as_str() {
+                            "viaduct" | "z1" | "1" => crate::game::Layer::Viaduct,
+                            "skyway" | "z2" | "2" => crate::game::Layer::Skyway,
+                            "subterranean" | "-1" => crate::game::Layer::Subterranean,
+                            _ => crate::game::Layer::Ground,
+                        }
+                    } else {
+                        crate::game::Layer::Ground
+                    };
+
+                    let coord = crate::game::GridCoord::new(x, y, layer);
+                    commands.spawn(crate::game::TransportedItem::new(itype, coord));
+                    format!("ACK_SPAWN_ITEM {} {} {:?} {:?}", x, y, itype, layer)
+                } else {
+                    "ERR_INVALID_COORDS".to_string()
                 }
             }
             "quit" | "exit" => {

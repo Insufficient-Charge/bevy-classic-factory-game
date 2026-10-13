@@ -29,23 +29,23 @@ pub fn spawn_hotbar_hud(mut commands: Commands) {
                 bottom: Val::Px(16.0),
                 left: Val::Percent(50.0),
                 margin: UiRect {
-                    left: Val::Px(-270.0), // center 540px container
+                    left: Val::Px(-280.0), // center 560px container
                     right: Val::Auto,
                     top: Val::Auto,
                     bottom: Val::Auto,
                 },
-                width: Val::Px(540.0),
-                height: Val::Px(56.0),
+                width: Val::Px(560.0),
+                height: Val::Px(58.0),
                 flex_direction: FlexDirection::Row,
                 justify_content: JustifyContent::SpaceEvenly,
                 align_items: AlignItems::Center,
                 padding: UiRect::all(Val::Px(4.0)),
                 border: UiRect::all(Val::Px(3.0)),
-                border_radius: BorderRadius::all(Val::Px(8.0)),
+                border_radius: BorderRadius::all(Val::Px(10.0)),
                 ..default()
             },
-            BackgroundColor(Color::srgba(0.18, 0.12, 0.08, 0.90)),
-            BorderColor::all(Color::srgb(0.55, 0.38, 0.20)),
+            BackgroundColor(Color::srgba(0.15, 0.10, 0.06, 0.94)),
+            BorderColor::all(Color::srgb(0.68, 0.50, 0.25)),
         ))
         .with_children(|parent| {
             for slot_index in 0..10 {
@@ -54,25 +54,25 @@ pub fn spawn_hotbar_hud(mut commands: Commands) {
                     .spawn((
                         HotbarSlotUi { slot_index },
                         Node {
-                            width: Val::Px(48.0),
-                            height: Val::Px(46.0),
+                            width: Val::Px(50.0),
+                            height: Val::Px(48.0),
                             flex_direction: FlexDirection::Column,
                             justify_content: JustifyContent::SpaceBetween,
                             align_items: AlignItems::Center,
                             padding: UiRect::all(Val::Px(2.0)),
                             border: UiRect::all(Val::Px(2.0)),
-                            border_radius: BorderRadius::all(Val::Px(6.0)),
+                            border_radius: BorderRadius::all(Val::Px(8.0)),
                             ..default()
                         },
-                        BackgroundColor(Color::srgba(0.28, 0.20, 0.14, 0.85)),
-                        BorderColor::all(Color::srgb(0.40, 0.28, 0.18)),
+                        BackgroundColor(Color::srgba(0.24, 0.17, 0.11, 0.88)),
+                        BorderColor::all(Color::srgb(0.44, 0.32, 0.19)),
                     ))
                     .with_children(|slot_parent| {
                         // Key index header
                         slot_parent.spawn((
                             Text::new(key_label.to_string()),
-                            TextFont::from_font_size(10.0),
-                            TextColor(Color::srgb(0.75, 0.65, 0.50)),
+                            TextFont::from_font_size(10.5),
+                            TextColor(Color::srgb(0.85, 0.72, 0.45)),
                         ));
 
                         // Item label / count
@@ -117,7 +117,7 @@ pub fn handle_hotbar_keys(
 
 /// Syncs the HUD visual borders, highlight colors, and item labels with player state.
 pub fn sync_hotbar_hud(
-    players: Query<(&Hotbar, &Inventory), With<crate::player::Player>>,
+    players: Query<(Ref<Hotbar>, Ref<Inventory>), With<crate::player::Player>>,
     mut slot_nodes: Query<(&HotbarSlotUi, &mut BorderColor, &mut BackgroundColor)>,
     mut text_nodes: Query<(&HotbarSlotText, &mut Text, &mut TextColor)>,
 ) {
@@ -125,14 +125,18 @@ pub fn sync_hotbar_hud(
         return;
     };
 
+    if !hotbar.is_changed() && !inventory.is_changed() {
+        return;
+    }
+
     // Update slot node borders (highlight active slot with golden glow)
     for (slot_ui, mut border, mut bg) in slot_nodes.iter_mut() {
         if slot_ui.slot_index == hotbar.selected_slot {
-            *border = BorderColor::all(Color::srgb(0.95, 0.82, 0.22)); // Golden border
-            bg.0 = Color::srgba(0.42, 0.30, 0.18, 0.95);
+            *border = BorderColor::all(Color::srgb(0.98, 0.85, 0.30)); // Burnished golden border
+            bg.0 = Color::srgba(0.44, 0.32, 0.18, 0.98);
         } else {
-            *border = BorderColor::all(Color::srgb(0.40, 0.28, 0.18)); // Wooden brown
-            bg.0 = Color::srgba(0.28, 0.20, 0.14, 0.85);
+            *border = BorderColor::all(Color::srgb(0.44, 0.32, 0.19)); // Warm timber frame
+            bg.0 = Color::srgba(0.24, 0.17, 0.11, 0.88);
         }
     }
 
@@ -155,6 +159,12 @@ pub fn sync_hotbar_hud(
                     super::items::ItemType::SortingGate => "Gate",
                     super::items::ItemType::SurveyBeacon => "Beac",
                     super::items::ItemType::LogicDiviner => "Divn",
+                    super::items::ItemType::ChromaticAutoclave => "Auto",
+                    super::items::ItemType::ResonanceBellJar => "Bell",
+                    super::items::ItemType::AcousticMonolith => "Mono",
+                    super::items::ItemType::TuningForkPylon => "Pylo",
+                    super::items::ItemType::HarmonicBridge => "Brdg",
+                    super::items::ItemType::ResonanceConductor => "Cond",
                     super::items::ItemType::IronPlate => "FePl",
                     super::items::ItemType::BrassCog => "Cog",
                     super::items::ItemType::WoodenPlank => "Plnk",
@@ -162,13 +172,17 @@ pub fn sync_hotbar_hud(
                     super::items::ItemType::PolyominoDomino => "Dom",
                     super::items::ItemType::PolyominoIBar => "I-Bar",
                     super::items::ItemType::PolyominoSquare => "Squr",
+                    super::items::ItemType::Ruby => "Ruby",
+                    super::items::ItemType::Sapphire => "Saph",
+                    super::items::ItemType::TuningFork => "Fork",
+                    super::items::ItemType::HarmonicRune => "Rune",
                     _ => "Item",
                 };
                 text.0 = format!("{}\n{}", abbrev, count);
-                color.0 = if count > 0 { Color::WHITE } else { Color::srgb(0.6, 0.5, 0.5) };
+                color.0 = if count > 0 { Color::WHITE } else { Color::srgb(0.65, 0.55, 0.50) };
             } else {
                 text.0 = "-".to_string();
-                color.0 = Color::srgb(0.4, 0.35, 0.3);
+                color.0 = Color::srgb(0.40, 0.35, 0.30);
             }
         }
     }
@@ -235,31 +249,31 @@ pub fn spawn_tester_guide_hud(mut commands: Commands) {
             Node {
                 position_type: PositionType::Absolute,
                 top: Val::Px(24.0),
-                right: Val::Px(20.0),
-                width: Val::Px(290.0),
+                left: Val::Px(24.0),
+                width: Val::Px(295.0),
                 flex_direction: FlexDirection::Column,
                 padding: UiRect::all(Val::Px(12.0)),
                 row_gap: Val::Px(6.0),
-                border: UiRect::all(Val::Px(1.5)),
-                border_radius: BorderRadius::all(Val::Px(8.0)),
+                border: UiRect::all(Val::Px(2.0)),
+                border_radius: BorderRadius::all(Val::Px(10.0)),
                 ..default()
             },
-            BackgroundColor(Color::srgba(0.10, 0.14, 0.20, 0.82)),
-            BorderColor::all(Color::srgba(0.40, 0.55, 0.70, 0.50)),
+            BackgroundColor(Color::srgba(0.12, 0.10, 0.08, 0.92)),
+            BorderColor::all(Color::srgba(0.78, 0.62, 0.32, 0.85)),
         ))
         .with_children(|parent| {
             // Header title
             parent.spawn((
-                Text::new("TESTER CHECKLIST"),
-                TextFont::from_font_size(13.0),
-                TextColor(Color::srgb(0.95, 0.82, 0.35)),
+                Text::new("EXPLORER'S FIELD GUIDE"),
+                TextFont::from_font_size(12.5),
+                TextColor(Color::srgb(0.98, 0.88, 0.42)),
             ));
 
             // Subtitle
             parent.spawn((
-                Text::new("Introductory verification tasks:"),
+                Text::new("Archipelago boot-sequence checklist:"),
                 TextFont::from_font_size(10.5),
-                TextColor(Color::srgb(0.65, 0.75, 0.85)),
+                TextColor(Color::srgb(0.80, 0.75, 0.65)),
             ));
 
             // Task item rows
@@ -268,7 +282,7 @@ pub fn spawn_tester_guide_hud(mut commands: Commands) {
                     TesterTaskItemText { task_id: i as u8 },
                     Text::new(format!("[ ] {}", label)),
                     TextFont::from_font_size(11.0),
-                    TextColor(Color::srgb(0.85, 0.88, 0.92)),
+                    TextColor(Color::srgb(0.88, 0.90, 0.94)),
                 ));
             }
 
@@ -277,7 +291,7 @@ pub fn spawn_tester_guide_hud(mut commands: Commands) {
                 TesterGuideSummaryText,
                 Text::new("Tasks Verified: 0 / 9"),
                 TextFont::from_font_size(11.5),
-                TextColor(Color::srgb(0.50, 0.85, 0.95)),
+                TextColor(Color::srgb(0.95, 0.82, 0.35)),
             ));
         });
 }
@@ -342,6 +356,10 @@ pub fn sync_tester_guide_hud(
     mut task_texts: Query<(&TesterTaskItemText, &mut Text, &mut TextColor), Without<TesterGuideSummaryText>>,
     mut summary_text: Query<(&mut Text, &mut TextColor), With<TesterGuideSummaryText>>,
 ) {
+    if !progress.is_changed() {
+        return;
+    }
+
     let task_defs = [
         (0, progress.moved, "Walk & Sprint: WASD / Shift"),
         (1, progress.rotated_camera, "Orbit Camera: Q / E / MMB (360°)"),
@@ -373,7 +391,7 @@ pub fn sync_tester_guide_hud(
             summary_color.0 = Color::srgb(0.40, 0.95, 0.55);
         } else {
             summary.0 = format!("Tasks Verified: {} / 9", count);
-            summary_color.0 = Color::srgb(0.50, 0.85, 0.95);
+            summary_color.0 = Color::srgb(0.95, 0.82, 0.35);
         }
     }
 }

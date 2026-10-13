@@ -315,7 +315,7 @@ mod tests {
         let mut unique = std::collections::HashSet::new();
         for n in all_8.iter() {
             assert!(unique.insert(*n), "Duplicate neighbor detected: {:?}", n);
-            assert_eq!(center.manhattan_distance(n) <= 2, true);
+            assert!(center.manhattan_distance(n) <= 2);
         }
     }
 

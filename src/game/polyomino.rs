@@ -306,8 +306,8 @@ mod tests {
         assert_eq!(grid.total_squishes, 1);
 
         // Row 0 should now be empty after clearing
-        for col in 0..CargoCompressorGrid::WIDTH {
-            assert!(!grid.cells[0][col]);
+        for cell in &grid.cells[0] {
+            assert!(!*cell);
         }
     }
 
